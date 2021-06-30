@@ -1,6 +1,6 @@
 # TRC (Textile Rolls Controller)
 
-A textile factory floor management software for tracking fabricated rolls after they are released from finishing (dying) department. **TRC** features:
+A textile factory floor management software for tracking fabricated rolls after they are released from a dyeing (finishing) department. **TRC** features:
 
  - [x] roll registration
  - [x] roll cutting 
@@ -19,7 +19,7 @@ Not yet implemented:
 
 ## Demo
 
-View animated gifs - [demo](./docs/demo.md), demonstrating main functionality (warning - huge gifs - traffic!)
+View [demo gifs](./docs/demo.md), demonstrating main features.
 
 ## Components
 
