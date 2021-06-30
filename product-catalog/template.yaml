@@ -1,0 +1,173 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  TRC App: Product Catalog microservice
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Environment stage or git branch
+
+Globals:
+  Function:
+    Runtime: nodejs14.x
+    MemorySize: 128
+
+Resources:
+  ProductsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+
+  CreateUpdateProductFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: catalog-crud/dist/createUpdateProduct
+      Handler: lambda.lambdaHandler
+      Tracing: Active
+      Environment:
+        Variables:
+           PRODUCT_TABLE: !Ref ProductsTable
+           QUEUE: !ImportValue
+             'Fn::Sub': 'TRC-${Stage}-ProductUpdateQueueUrl'
+      Policies:
+        - Statement:
+          - Effect: Allow
+            Action:
+              - "sqs:DeleteMessage"
+            Resource: !ImportValue
+              'Fn::Sub': 'TRC-${Stage}-ProductUpdateQueueArn'
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductsTable
+      Events:
+        SQSProductUpdated:
+          Type: SQS
+          Properties:
+            Queue: !ImportValue
+              'Fn::Sub': 'TRC-${Stage}-ProductUpdateQueueArn'
+            BatchSize: 10
+
+  CreateUpdateCharacteristicFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: catalog-crud/dist/createUpdateCharacteristic
+      Handler: lambda.lambdaHandler
+      Tracing: Active
+      Environment:
+        Variables:
+          PRODUCT_TABLE: !Ref ProductsTable
+          QUEUE: !ImportValue
+            'Fn::Sub': 'TRC-${Stage}-CharacteristicUpdateQueueUrl'
+      Policies:
+        - Statement:
+          - Effect: Allow
+            Action:
+              - "sqs:DeleteMessage"
+            Resource: !ImportValue
+              'Fn::Sub': 'TRC-${Stage}-CharacteristicUpdateQueueArn'
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductsTable
+      Events:
+        SQSProductUpdated:
+          Type: SQS
+          Properties:
+            Queue: !ImportValue
+              'Fn::Sub': 'TRC-${Stage}-CharacteristicUpdateQueueArn'
+            BatchSize: 30
+            MaximumBatchingWindowInSeconds: 60
+
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors:
+        AllowMethods: "'GET', 'OPTIONS'"
+        AllowHeaders: "'Authorization'"
+        AllowOrigin: "'*'"
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        AddDefaultAuthorizerToCorsPreflight: false
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !ImportValue
+              'Fn::Sub': 'TRC-${Stage}-UserPoolArn'
+            Identity:
+              Header: Authorization
+
+  GetAllProductsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: catalog-crud/dist/getAllProducts
+      Handler: lambda.lambdaHandler
+      Tracing: Active
+      Environment:
+        Variables:
+          PRODUCT_TABLE: !Ref ProductsTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductsTable
+      Events:
+        GetProductCatalogAPI:
+          Type: Api
+          Properties:
+            Path: /products
+            Method: get
+            RestApiId: !Ref Api
+
+  GetAllCharacteristicsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: catalog-crud/dist/getAllCharacteristics
+      Handler: lambda.lambdaHandler
+      Tracing: Active
+      Environment:
+        Variables:
+          PRODUCT_TABLE: !Ref ProductsTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductsTable
+      Events:
+        GetProductCatalogAPI:
+          Type: Api
+          Properties:
+            Path: /products/{productId}/
+            Method: get
+            RestApiId: !Ref Api
+
+  GetSpecificProductAndCharacteristicFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: catalog-crud/dist/getSpecificProductAndCharacteristic
+      Handler: lambda.lambdaHandler
+      Tracing: Active
+      Environment:
+        Variables:
+          PRODUCT_TABLE: !Ref ProductsTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductsTable
+      Events:
+        GetProductCatalogAPI:
+          Type: Api
+          Properties:
+            Path: /products/{productId}/{characteristicId}
+            Method: get
+            RestApiId: !Ref Api
+
+Outputs:
+  APIAddress:
+    Description: "Product catalog URL for Prod stage"
+    Value: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+    Export:
+      Name: !Sub "TRC-${Stage}-Products-API-URL"
+

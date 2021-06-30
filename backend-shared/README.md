@@ -1,0 +1,1 @@
+This service contains only shared (with other services) AWS components, described in `template.yaml`. There is no JS/TS code. 

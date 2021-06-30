@@ -1,0 +1,90 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  TRC App: ERP Master System integration endpoint
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Environment stage or git branch
+  ApiKey:
+    Type: String
+    MinLength: 20
+    Description: "API Key (>= 20 characters) for the integration endpoint. Using this key in the header 'x-api-key' the Master Data System will send events to this endpoint."
+
+Globals:
+  Function:
+    Runtime: nodejs14.x
+    MemorySize: 128
+   
+Resources:
+  ApiKeyForIntegration:
+    Type: AWS::ApiGateway::ApiKey
+    Properties:
+      Enabled: true
+      Value: !Ref ApiKey
+      StageKeys:
+        - RestApiId: !Ref ServerlessRestApi
+          StageName: !Ref ServerlessRestApiProdStage
+
+  ApiUsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    Properties:
+      ApiStages:
+        - ApiId: !Ref ServerlessRestApi
+          Stage: !Ref ServerlessRestApiProdStage
+      Quota:
+        Limit: 5000
+        Period: MONTH
+      Throttle:
+        BurstLimit: 200
+        RateLimit: 100
+
+  UsagePlanKey:
+    DependsOn:
+      - ServerlessRestApi
+    Type: AWS::ApiGateway::UsagePlanKey
+    Properties:
+      KeyId: !Ref ApiKeyForIntegration
+      KeyType: API_KEY
+      UsagePlanId: !Ref ApiUsagePlan
+
+  ReceiveIncomingMessageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: incoming-message-processor/
+      Handler: build/app.lambdaHandler
+      Tracing: Active
+      Environment:
+        Variables:
+          PRODUCT_UPDATE_QUEUE: !ImportValue
+            'Fn::Sub': 'TRC-${Stage}-ProductUpdateQueueUrl'
+          CHARACTERISTIC_UPDATE_QUEUE: !ImportValue
+            'Fn::Sub': 'TRC-${Stage}-CharacteristicUpdateQueueUrl'
+          PRODUCT_IMAGES_BUCKET: !ImportValue
+            'Fn::Sub': 'TRC-${Stage}-ProductImagesBucket'
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName:
+              !ImportValue
+              'Fn::Sub': 'TRC-${Stage}-CharacteristicUpdateQueueName'
+        - SQSSendMessagePolicy:
+            QueueName:
+              !ImportValue
+              'Fn::Sub': 'TRC-${Stage}-ProductUpdateQueueName'
+        - S3CrudPolicy:
+            BucketName: !ImportValue
+              'Fn::Sub': 'TRC-${Stage}-ProductImagesBucket'
+      Events:
+        ReceiveProductUpdateApi:
+          Type: Api
+          Properties:
+            Path: /
+            Method: post
+            Auth:
+              ApiKeyRequired: true
+
+Outputs:
+  APIAddress:
+    Description: "Integration API endpoint URL for Prod stage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"

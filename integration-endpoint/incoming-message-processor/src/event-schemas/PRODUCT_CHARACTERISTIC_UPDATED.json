@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "com.sgalushin.trc.product-characteristic-updated",
+  "title": "Product Characteristic Updated Event",
+  "description": "An event emitted by the master ERP system when a product characteristic item was created or updated",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "id": {
+      "type": "string",
+      "description": "Unique immutable GUID",
+      "minLength": 36,
+      "maxLength": 36
+    },
+    "productId": {
+      "type": "string",
+      "description": "Unique immutable GUID of a product (owner of a characteristic)",
+      "minLength": 36,
+      "maxLength": 36
+    },
+    "version": {
+      "type": "string",
+      "description": "A random (non-sequential) string, that represents a version of an item",
+      "minLength": 1
+    },
+    "previousVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deletionMark": {
+      "type": "boolean"
+    },
+    "picture": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "crock2": {
+          "type": "string",
+          "description": "Domain-specific id of an picture",
+          "minLength": 1
+        },
+        "file": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "hash": {
+              "type": "string",
+              "minLength": 64,
+              "maxLength": 64,
+              "description": "SHA256 hash of an picture"
+            },
+            "blob": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Base64-encoded picture"
+            },
+            "fileExtension": {
+              "type": "string",
+              "enum": ["jpg", "JPG", "jpeg", "JPEG"]
+            }
+          }
+        }
+      },
+      "required": ["id", "name"]
+    },
+    "color": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Company-specific color code. Doesn't correspond to RGB or Pantone"
+        },
+        "name": {
+          "type": "string"
+        },
+        "pantone": {
+          "type": "string",
+          "description": "Pantone TX. See https://www.pantone.com/application/textiles"
+        }
+      },
+      "required": ["id"]
+    }
+  },
+  "required": ["name", "id", "productId", "version", "previousVersion", "deletionMark"]
+}

@@ -1,0 +1,165 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  TRC App: common objects
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Environment stage or git branch
+
+Resources:
+
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      UsernameAttributes:
+        - email
+
+  WebUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      GenerateSecret: false
+      PreventUserExistenceErrors: ENABLED
+      UserPoolId: !Ref UserPool
+
+  IdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      AllowUnauthenticatedIdentities: false
+      CognitoIdentityProviders:
+        - ClientId: !Ref WebUserPoolClient
+          ProviderName: !Sub "cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}"
+
+  WebClientAuthenticatedRoleForIdentityPool:
+    Type: AWS::IAM::Role
+    Properties:
+      Policies:
+        - PolicyName: Cognito-Identity-default-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "mobileanalytics:PutEvents"
+                  - "cognito-sync:*"
+                  - "cognito-identity:*"
+                Resource: "*"
+        - PolicyName: Read-S3-Bucket-with-product-images
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "s3:Get*"
+                  - "s3:List*"
+                Resource: !Join
+                  - ''
+                  - - !GetAtt ProductImagesBucket.Arn
+                    - '/*'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: cognito-identity.amazonaws.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                cognito-identity.amazonaws.com:aud: !Ref IdentityPool
+              ForAnyValue:StringLike:
+                cognito-identity.amazonaws.com:amr: authenticated
+
+  IdentityPoolRoleAttachment:
+    Type: AWS::Cognito::IdentityPoolRoleAttachment
+    Properties:
+      IdentityPoolId: !Ref IdentityPool
+      Roles:
+        "authenticated": !GetAtt WebClientAuthenticatedRoleForIdentityPool.Arn
+
+  ProductUpdateQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      RedrivePolicy:
+        deadLetterTargetArn:
+          Fn::GetAtt:
+            - "IncomingMessagesDLQ"
+            - "Arn"
+        maxReceiveCount: 3
+      VisibilityTimeout: 120
+
+  CharacteristicUpdateQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      RedrivePolicy:
+        deadLetterTargetArn:
+          Fn::GetAtt:
+            - "IncomingMessagesDLQ"
+            - "Arn"
+        maxReceiveCount: 3
+      VisibilityTimeout: 120
+
+  IncomingMessagesDLQ:
+    Type: AWS::SQS::Queue
+
+  ProductImagesBucket:
+    Type: AWS::S3::Bucket
+
+Outputs:
+  UserPool:
+    Description: "User pool"
+    Value: !Ref UserPool
+    Export:
+      Name: !Sub "TRC-${Stage}-UserPool"
+  UserPoolArn:
+    Description: "User pool ARN"
+    Value: !GetAtt UserPool.Arn
+    Export:
+      Name: !Sub "TRC-${Stage}-UserPoolArn"
+  WebUserPoolClient:
+    Description: "User pool: web client"
+    Value: !Ref WebUserPoolClient
+    Export:
+      Name: !Sub "TRC-${Stage}-WebUserPoolClient"
+  IdentityPool:
+    Description: "Identity pool"
+    Value: !Ref IdentityPool
+    Export:
+      Name: !Sub "TRC-${Stage}-IdentityPool"
+  ProductImagesBucket:
+    Description: "S3 Bucket with product images"
+    Value: !Ref ProductImagesBucket
+    Export:
+      Name: !Sub "TRC-${Stage}-ProductImagesBucket"
+
+  ProductUpdateQueueName:
+    Description: "Queue for events of type PRODUCT_UPDATE (Name)"
+    Value: !GetAtt ProductUpdateQueue.QueueName
+    Export:
+      Name: !Sub "TRC-${Stage}-ProductUpdateQueueName"
+  CharacteristicUpdateQueueName:
+    Description: "Queue for events of type CHARACTERISTIC_UPDATE (Name)"
+    Value: !GetAtt CharacteristicUpdateQueue.QueueName
+    Export:
+      Name: !Sub "TRC-${Stage}-CharacteristicUpdateQueueName"
+  ProductUpdateQueueUrl:
+    Description: "Queue for events of type PRODUCT_UPDATE (URL)"
+    Value: !Ref ProductUpdateQueue
+    Export:
+      Name: !Sub "TRC-${Stage}-ProductUpdateQueueUrl"
+  CharacteristicUpdateQueueUrl:
+    Description: "Queue for events of type CHARACTERISTIC_UPDATE (URL)"
+    Value: !Ref CharacteristicUpdateQueue
+    Export:
+      Name: !Sub "TRC-${Stage}-CharacteristicUpdateQueueUrl"
+  ProductUpdateQueueArn:
+    Description: "Queue for events of type PRODUCT_UPDATE (Arn)"
+    Value: !GetAtt ProductUpdateQueue.Arn
+    Export:
+      Name: !Sub "TRC-${Stage}-ProductUpdateQueueArn"
+  CharacteristicUpdateQueueArn:
+    Description: "Queue for events of type CHARACTERISTIC_UPDATE (Arn)"
+    Value: !GetAtt CharacteristicUpdateQueue.Arn
+    Export:
+      Name: !Sub "TRC-${Stage}-CharacteristicUpdateQueueArn"

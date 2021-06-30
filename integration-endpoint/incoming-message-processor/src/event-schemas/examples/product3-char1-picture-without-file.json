@@ -1,0 +1,17 @@
+{
+  "payload": {
+    "deletionMark": true,
+    "productId": "08617322-cc61-11e8-812e-90b11c13856b",
+    "picture": {
+      "id": "9191",
+      "crock2": "248 а",
+      "name": "9191-1"
+    },
+    "previousVersion": "AAAAAAAiSn0=",
+    "version": "AAAAAAAiiSQ=",
+    "id": "3e15606d-2963-11ea-8150-90b11c13856b",
+    "name": "9191-1"
+  },
+  "eventType": "PRODUCT_CHARACTERISTICS_UPDATED",
+  "eventCreationDate": "2021-05-29T23:40:14"
+}

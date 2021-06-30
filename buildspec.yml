@@ -1,0 +1,38 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 14
+    commands:
+
+      # Upgrade AWS CLI to the latest version
+      - pip install --upgrade awscli
+
+      - docker run -p 8000:8000 -d public.ecr.aws/p7c5q3n4/amazon/dynamodb-local:latest
+      - (cd product-catalog/catalog-crud && npm ci)
+      - (cd product-catalog/receive-incoming-message && npm ci)
+
+
+
+  pre_build:
+    commands:
+      - cd $CODEBUILD_SRC_DIR
+      - (cd product-catalog/catalog-crud && npm run build && npm run test-incl-service)
+      - (cd product-catalog/receive-incoming-message && npm run build && npm test)
+
+
+
+  build:
+    commands:
+      - cd $CODEBUILD_SRC_DIR
+      - aws cloudformation package --template template.yaml --s3-bucket $S3_BUCKET --output-template template-export.yaml
+      - (cd product-catalog && aws cloudformation package --template template.yaml --s3-bucket $S3_BUCKET --output-template template-export.yaml)
+
+  post_build:
+    commands:
+
+artifacts:
+  files:
+    - template-export.yaml
+    - product-catalog/template-export.yaml

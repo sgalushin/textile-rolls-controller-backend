@@ -1,0 +1,17 @@
+{
+  "payload": {
+    "deletionMark": false,
+    "productId": "e8677234-cc5d-11e8-812e-90b11c13856b",
+    "color": {
+      "pantone": "15-3508",
+      "name": "лепесток орхидеи",
+      "id": "11650"
+    },
+    "previousVersion": "AAAAAAAiSCk=",
+    "version": "AAAAAAAihs8=",
+    "id": "16cc3bc8-b8e3-11e9-814d-90b11c13856b",
+    "name": "11650 лепесток орхидеи"
+  },
+  "eventType": "PRODUCT_CHARACTERISTICS_UPDATED",
+  "eventCreationDate": "2021-05-29T23:39:30"
+}

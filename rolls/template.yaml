@@ -1,0 +1,466 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  TRC App: Rolls microservice
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Environment stage or git branch
+
+Globals:
+  Function:
+    Runtime: nodejs14.x
+    MemorySize: 128
+   
+Resources:
+  RollsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+        - AttributeName: gs1pk
+          AttributeType: S
+        - AttributeName: gs1sk
+          AttributeType: S
+        - AttributeName: gs2pk
+          AttributeType: S
+        - AttributeName: gs2sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: gs1
+          KeySchema:
+            - AttributeName: gs1pk
+              KeyType: HASH
+            - AttributeName: gs1sk
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: gs2
+          KeySchema:
+            - AttributeName: gs2pk
+              KeyType: HASH
+            - AttributeName: gs2sk
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      TracingEnabled: true
+
+      Cors:
+        AllowMethods: "'GET, POST, OPTIONS'"
+        AllowHeaders: "'Authorization, Content-Type'"
+        AllowOrigin: "'*'"
+
+      # A temporary solution because of a bug in AWS SAM. See https://github.com/aws/serverless-application-model/issues/1403
+      DefinitionBody:
+        swagger: 2.0
+        info:
+          title: !Sub "trc-${Stage}-rolls"
+        x-amazon-apigateway-request-validators:
+          onlyBody:
+            validateRequestBody: true
+            validateRequestParameters: false
+          nothing:
+            validateRequestBody: false
+            validateRequestParameters: false
+          onlyParameters:
+            validateRequestBody: false
+            validateRequestParameters: true
+
+        # Default validator is set to nothing so that all paths with OPTIONS methods will be created without validation
+        x-amazon-apigateway-request-validator: nothing
+        paths:
+          "/rolls/createRoll":
+            post:
+              x-amazon-apigateway-request-validator: onlyBody
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateRollFunction.Arn}/invocations'
+              parameters:
+                - required: true
+                  in: body
+                  name: CreateNewRollInput
+                  schema:
+                    $ref: '#/definitions/CreateRollInput'
+          "/rolls/updateRoll":
+            post:
+              x-amazon-apigateway-request-validator: onlyBody
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateRollFunction.Arn}/invocations'
+              parameters:
+                - required: true
+                  in: body
+                  name: UpdateNewRollInput
+                  schema:
+                    $ref: '#/definitions/UpdateRollInput'
+          "/rolls/createDescendantRoll":
+            post:
+              x-amazon-apigateway-request-validator: onlyBody
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateDescendantRollFunction.Arn}/invocations'
+              parameters:
+                - required: true
+                  in: body
+                  name: CreateDescendantRollInput
+                  schema:
+                    $ref: '#/definitions/CreateDescendantRollInput'
+          "/rolls/getRoll":
+            post:
+              x-amazon-apigateway-request-validator: onlyBody
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetRollFunction.Arn}/invocations'
+              parameters:
+                - required: true
+                  in: body
+                  name: GetRollInput
+                  schema:
+                    $ref: '#/definitions/GetRollInput'
+          "/rolls/getRefsWithoutSaving":
+            post:
+              x-amazon-apigateway-request-validator: onlyBody
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetRefsWithoutSavingFunction.Arn}/invocations'
+              parameters:
+                - required: true
+                  in: body
+                  name: GetRollInput
+                  schema:
+                    $ref: '#/definitions/GetRefsWithoutSavingInput'
+          "/rolls/getAllRollsByDate":
+            post:
+              x-amazon-apigateway-request-validator: onlyBody
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetAllRollsByDateFunction.Arn}/invocations'
+              parameters:
+                - required: true
+                  in: body
+                  name: GetAllRollsByDateInput
+                  schema:
+                    $ref: '#/definitions/GetAllRollsByDateInput'
+          "/rolls/getAllRollsByPhysicalId":
+            post:
+              x-amazon-apigateway-request-validator: onlyBody
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetAllRollsByPhysicalIdFunction.Arn}/invocations'
+              parameters:
+                - required: true
+                  in: body
+                  name: GetAllRollsByPhysicalIdInput
+                  schema:
+                    $ref: '#/definitions/GetAllRollsByPhysicalIdInput'
+        definitions:
+          CreateRollInput:
+            type: object
+            required:
+              - product
+              - characteristic
+              - user
+              - previousDepartmentInfo
+              - totalLength
+            properties:
+              product:
+                type: object
+              characteristic:
+                type: object
+              user:
+                type: object
+              previousDepartmentInfo:
+                type: object
+              totalLength:
+                type: number
+                minimum: 1
+          UpdateRollInput:
+            type: object
+            required:
+              - user
+              - ref
+            properties:
+              product:
+                type: object
+              characteristic:
+                type: object
+              user:
+                type: object
+              previousDepartmentInfo:
+                type: object
+              totalLength:
+                type: number
+                minimum: 1
+              deletionMark:
+                type: boolean
+              ref:
+                type: object
+                required:
+                  - id
+                  - version
+                properties:
+                  id:
+                    type: string
+                  version:
+                    type: string
+          CreateDescendantRollInput:
+            type: object
+            required:
+              - parentRef
+              - user
+              - totalLength
+              - firstClassLength
+              - quality
+            properties:
+              quality:
+                type: object
+              newRef:
+                type: object
+                required:
+                  - id
+                  - version
+                properties:
+                  id:
+                    type: string
+                  version:
+                    type: string
+              parentRef:
+                type: object
+                required:
+                  - id
+                  - version
+                properties:
+                  id:
+                    type: string
+                  version:
+                    type: string
+              user:
+                type: object
+              totalLength:
+                type: number
+                minimum: 1
+              firstClassLength:
+                type: number
+                minimum: 1
+
+          GetRollInput:
+            type: object
+            required:
+              - id
+              - version
+            properties:
+              id:
+                type: string
+              version:
+                type: string
+          GetRefsWithoutSavingInput:
+            type: object
+            required:
+              - numberOfRefs
+            properties:
+              numberOfRefs:
+                type: integer
+                minimum: 1
+          GetAllRollsByDateInput:
+            type: object
+            required:
+              - date
+            properties:
+              numberOfRefs:
+                type: string
+                minimum: 24
+                maximum: 24
+          GetAllRollsByPhysicalIdInput:
+            type: object
+            required:
+              - physicalId
+            properties:
+              numberOfRefs:
+                type: string
+                minimum: 1
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        AddDefaultAuthorizerToCorsPreflight: false
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !ImportValue
+              'Fn::Sub': 'TRC-${Stage}-UserPoolArn'
+            Identity:
+              Header: Authorization
+
+  CreateRollFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: rolls-crud/dist/createRoll
+      Handler: lambda.lambdaHandler
+      Tracing: Active
+      Environment:
+        Variables:
+          ROLLS_TABLE: !Ref RollsTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RollsTable
+      Events:
+        CreateRollAPI:
+          Type: Api
+          Properties:
+            Path: /rolls/createRoll
+            Method: post
+            RestApiId: !Ref Api
+            RequestModel:
+              Model: CreateRollInput
+              Required: true
+
+  UpdateRollFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: rolls-crud/dist/updateRoll
+      Handler: lambda.lambdaHandler
+      Tracing: Active
+      Environment:
+        Variables:
+          ROLLS_TABLE: !Ref RollsTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RollsTable
+      Events:
+        CreateRollAPI:
+          Type: Api
+          Properties:
+            Path: /rolls/updateRoll
+            Method: post
+            RestApiId: !Ref Api
+            RequestModel:
+              Model: UpdateRollInput
+              Required: true
+
+  CreateDescendantRollFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: rolls-crud/dist/createDescendantRoll
+      Handler: lambda.lambdaHandler
+      Tracing: Active
+      Environment:
+        Variables:
+          ROLLS_TABLE: !Ref RollsTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RollsTable
+      Events:
+        CreateDescendantRollAPI:
+          Type: Api
+          Properties:
+            Path: /rolls/createDescendantRoll
+            Method: post
+            RestApiId: !Ref Api
+            RequestModel:
+              Model: CreateDescendantRollInput
+              Required: true
+
+  GetRollFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: rolls-crud/dist/getRoll
+      Handler: lambda.lambdaHandler
+      Tracing: Active
+      Environment:
+        Variables:
+          ROLLS_TABLE: !Ref RollsTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RollsTable
+      Events:
+        GetRollAPI:
+          Type: Api
+          Properties:
+            Path: /rolls/getRoll
+            Method: post
+            RestApiId: !Ref Api
+
+  GetAllRollsByDateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: rolls-crud/dist/getAllRollsByDate
+      Handler: lambda.lambdaHandler
+      Tracing: Active
+      Environment:
+        Variables:
+          ROLLS_TABLE: !Ref RollsTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RollsTable
+      Events:
+        GetRollAPI:
+          Type: Api
+          Properties:
+            Path: /rolls/getAllRollsByDate
+            Method: post
+            RestApiId: !Ref Api
+
+  GetAllRollsByPhysicalIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: rolls-crud/dist/getAllRollsByPhysicalId
+      Handler: lambda.lambdaHandler
+      Tracing: Active
+      Environment:
+        Variables:
+          ROLLS_TABLE: !Ref RollsTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RollsTable
+      Events:
+        GetRollAPI:
+          Type: Api
+          Properties:
+            Path: /rolls/getAllRollsByPhysicalId
+            Method: post
+            RestApiId: !Ref Api
+
+  GetRefsWithoutSavingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: rolls-crud/dist/getRefsWithoutSaving
+      Handler: lambda.lambdaHandler
+      Tracing: Active
+      Events:
+        GetRollAPI:
+          Type: Api
+          Properties:
+            Path: /rolls/getRefsWithoutSaving
+            Method: post
+            RestApiId: !Ref Api
+
+Outputs:
+  APIAddress:
+    Description: "Rolls endpoint URL for Prod stage"
+    Value: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/Prod/"

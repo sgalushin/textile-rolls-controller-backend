@@ -1,0 +1,38 @@
+# Product Catalog
+
+Product Catalog service reads products and characteristics from the corresponding SQS queues, saves them in DynamoDB table.
+
+It provides a REST API to read:
+ - all products;
+ - all characteristics for a specific product;
+ - a specific combination of a product and a characteristic.
+
+## Idempotency and Out-of-order Events 
+
+Saving a product/characteristic is an idempotent operation. An item is saved only when:
+
+ - there are no previous versions of the item-to-be-saved.
+ - there is a previous version of the item-to-be-saved, and the field `previousVersion` of the item-to-be-saved is equal to the field `version` of the item that is currently in the Table.
+
+This allows events to arrive out-of-order, and also allows duplicate events. 
+
+
+## Product vs Characteristic definition
+
+A product is a generalized description of some entity (like a model of a T-Shirt). Product doesn't depend on or reference another product.
+
+A characteristic is a specification of some specific product (like a combination of size and color). A characteristic is always owned by some product.
+
+The item that is produced and sold is always a combination of a product and a characteristic (it cannot consist of only a product without a characteristic).
+
+One characteristic can be owned only by one product. So, there is a one-to-many relationship between products and characteristics.
+
+## Tips
+
+ - When adding new or renaming existing lambda handlers, don't forget to update `webpack.config.js`!
+   
+## Tests
+
+There are two types of tests in this service: ordinary and `service`. Ordinary tests a run by `npm run test` and don't require any external dependencies.
+
+Both ordinary and `service` tests are run by `npm run test-incl-srv` and require a local DynamoDB running on `localhost:8000`. Docker command to start DynamoDB: `docker run -p 8000:8000 -d amazon/dynamodb-local`.
