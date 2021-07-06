@@ -62,11 +62,14 @@ View [demo gifs](./docs/demo.md), demonstrating main features.
 
 1. Manually create an S3 bucket (or use an existing one). This bucket will be used as `BUCKET_FOR_LAMBDAS` during deployment. 
 
-2. (optional) By default CORS policy is `Allow-Origin: "*"`. You can tighten CORS restrictions in the Product Catalog and Rolls services: 
+2. Run `make install` to install npm packages for every service.
+
+3. (optional) By default CORS policy is `Allow-Origin: "*"`. You can tighten CORS restrictions in the Product Catalog and Rolls services: 
    - Change the `Api/Properties/Cors/AllowOrigin/` section in each `template.yaml`.
    - Change `SERVICE_DIRECTORY/src/lambda-handlers/accessControlHeaders.json`
 
-3. From the root project directory run the following command:
+
+4. From the root project directory run the following command:
 
 `make deploy PARAMETERS`
 
