@@ -7,9 +7,9 @@
   "license": "MIT",
   "scripts": {
     "test": "jest test",
+    "test:watch": "jest test --watch",
     "build": "tsc && webpack",
-    "build:watch": "tsc -w",
-    "test:watch": "jest test --watch"
+    "build:watch": "tsc -w"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.76",

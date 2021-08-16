@@ -1,7 +1,5 @@
 /*
- * @group service
- *
- * Common functions for service tests using DynamoDB Local
+ * Common functions for tests using local DynamoDB
  */
 
 import KSUID from "ksuid";

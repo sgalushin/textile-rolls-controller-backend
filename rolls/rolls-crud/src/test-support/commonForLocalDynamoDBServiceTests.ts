@@ -1,9 +1,3 @@
-/*
- * @group service
- *
- * Common functions for service tests using DynamoDB Local
- */
-
 import { CreateTableCommand, DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import KSUID from "ksuid";
 
