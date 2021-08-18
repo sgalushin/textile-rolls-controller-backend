@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  TRC App: Product Catalog microservice
+  TRC App: Product Catalog service
 
 Parameters:
   Stage:
@@ -170,4 +170,3 @@ Outputs:
     Value: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
     Export:
       Name: !Sub "TRC-${Stage}-Products-API-URL"
-
