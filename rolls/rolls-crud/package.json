@@ -27,7 +27,7 @@
     "@aws-sdk/client-dynamodb": "^3.17.0",
     "aws-sdk": "^2.921.0",
     "axios": "^0.21.1",
-    "dynamodb-toolbox": "git+ssh://sgalushin@github.com:sgalushin/dynamodb-toolbox.git#fix-pk-in-global-index-sk-usage",
+    "dynamodb-toolbox": "git://github.com/sgalushin/dynamodb-toolbox.git#fix-pk-in-global-index-sk-usage",
     "ksuid": "^2.0.0"
   }
 }
