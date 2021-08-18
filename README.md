@@ -104,6 +104,19 @@ All unit tests require DynamoDB Local to be available on `localhost:8000`. To ru
 
 To be done.
 
+## CI / CD
+
+TRC uses [AWS CodeBuild](https://aws.amazon.com/codebuild/). Build configuration is in [buildspec.yml](./buildspec.yml).
+
+When creating a CodeBulid project, use the following settings:
+ 
+- Use `Ubuntu` image (instead of default`Amazon Linux`) as it is the only one that supports Node 14.
+- Check `Priviledged` flag to enable running Docker (for unit tests).
+- Create the same environment variables, that are described in [Backend Deployment](#backend-deployment).
+- In AWS Secrets Manager create a secret named `GITHUB_CREDENTIALS` with two keys: `PRIVATE_KEY` and `PUBLIC_KEY`. The values should be corresponding base64 encoded GitHub ssh keys.
+
+Usage of ssh keys is required for npm to be able to download a forked package of `dynamodb-toolbox`. Currently, it is not possible to enforce npm to download packages with explicit references to GitHub using `https` (see https://github.com/npm/cli/issues/2610).
+
 ## Project status
 
 This app was created as a pre-sales proof-of-concept for a specific client to demonstrate the feasibility of moving some parts of the existing classic three-tier ERP application to a serverless AWS stack. Currently, its development is abandoned.
