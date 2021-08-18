@@ -5,3 +5,6 @@ deploy:
 
 install:
 	(cd rolls-crud && npm ci)
+
+test:
+	(cd rolls-crud && npm run test)

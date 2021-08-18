@@ -24,6 +24,13 @@ install:
 	$(MAKE) install.product-catalog
 	$(MAKE) install.rolls
 
+test:
+	$(info [*] Running tests...)
+	$(MAKE) test.integration-endpoint
+	$(MAKE) test.product-catalog
+	$(MAKE) test.rolls
+
+
 
 deploy.backend-shared:
 	$(MAKE) -C backend-shared deploy
@@ -37,6 +44,7 @@ deploy.product-catalog:
 deploy.rolls:
 	$(MAKE) -C rolls deploy
 
+
 install.integration-endpoint:
 	$(MAKE) -C integration-endpoint install
 
@@ -45,6 +53,16 @@ install.product-catalog:
 
 install.rolls:
 	$(MAKE) -C rolls install
+
+
+test.integration-endpoint:
+	$(MAKE) -C integration-endpoint test
+
+test.product-catalog:
+	$(MAKE) -C product-catalog test
+
+test.rolls:
+	$(MAKE) -C rolls test
 
 
 define HELP_MESSAGE

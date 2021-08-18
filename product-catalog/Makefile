@@ -5,3 +5,6 @@ deploy:
 
 install:
 	(cd catalog-crud && npm ci)
+
+test:
+	(cd catalog-crud && npm run test)

@@ -5,3 +5,6 @@ deploy:
 
 install:
 	(cd incoming-message-processor && npm ci)
+
+test:
+	(cd incoming-message-processor && npm run test)

@@ -87,6 +87,23 @@ Keep in mind that when deploying a new stage, integration API key must not be re
 After initial deployment specific services can be updated with `make deploy.SERVICE` command, for example
 `make deploy.rolls STAGE=st2 INTEGRATION_API_KEY=wcqp4peshv57dulfakpm REGION=eu-west-1 BUCKET_FOR_LAMBDAS=my-bucket-for-lambdas-0492320`
 
+## Testing
+
+### Unit tests
+
+Before running tests make sure you have installed all packages by running `make install` from the project root directory.
+
+To run all tests execute `make test` from the project root directory.
+
+To test that package execute `npm run test` from that package's directory.
+
+All unit tests require DynamoDB Local to be available on `localhost:8000`. To run it in Docker use `docker run -p 8000:8000 -d amazon/dynamodb-local`. Unit tests create randomly named DynamoDB tables and don't delete them after the test (for performance reasons). The expectation is that the DynamoDB Local container should be easily discarded. Running multiple iterations of tests on the same container is fine as a chance for a collision in table names is extremely unlikely.
+
+
+### End-to-End tests
+
+To be done.
+
 ## Project status
 
 This app was created as a pre-sales proof-of-concept for a specific client to demonstrate the feasibility of moving some parts of the existing classic three-tier ERP application to a serverless AWS stack. Currently, its development is abandoned.
