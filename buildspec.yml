@@ -10,24 +10,20 @@ phases:
       - pip install --upgrade awscli
 
       - docker run -p 8000:8000 -d public.ecr.aws/p7c5q3n4/amazon/dynamodb-local:latest
-      - (cd product-catalog/catalog-crud && npm ci)
-      - (cd product-catalog/receive-incoming-message && npm ci)
+      - make install
 
 
 
   pre_build:
     commands:
       - cd $CODEBUILD_SRC_DIR
-      - (cd product-catalog/catalog-crud && npm run build && npm run test-incl-service)
-      - (cd product-catalog/receive-incoming-message && npm run build && npm test)
-
+      - make test
 
 
   build:
     commands:
       - cd $CODEBUILD_SRC_DIR
-      - aws cloudformation package --template template.yaml --s3-bucket $S3_BUCKET --output-template template-export.yaml
-      - (cd product-catalog && aws cloudformation package --template template.yaml --s3-bucket $S3_BUCKET --output-template template-export.yaml)
+      - make deploy BUCKET_FOR_LAMBDAS=$BUCKET_FOR_LAMBDAS STAGE=$STAGE INTEGRATION_API_KEY=$INTEGRATION_API_KEY
 
   post_build:
     commands:
