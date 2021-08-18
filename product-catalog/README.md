@@ -30,9 +30,4 @@ One characteristic can be owned only by one product. So, there is a one-to-many 
 ## Tips
 
  - When adding new or renaming existing lambda handlers, don't forget to update `webpack.config.js`!
-   
-## Tests
-
-There are two types of tests in this service: ordinary and `service`. Ordinary tests a run by `npm run test` and don't require any external dependencies.
-
-Both ordinary and `service` tests are run by `npm run test-incl-srv` and require a local DynamoDB running on `localhost:8000`. Docker command to start DynamoDB: `docker run -p 8000:8000 -d amazon/dynamodb-local`.
+ 
