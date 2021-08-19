@@ -1,8 +1,10 @@
 # Product Catalog
 
-Product Catalog service reads products and characteristics from the corresponding SQS queues, saves them in DynamoDB table.
+Product Catalog service reads products and characteristics from the corresponding SQS queues, saves them in a DynamoDB table.
 
-It provides a REST API to read:
+While saving a characteristic it tries to convert its TPX color code into RGB by parsing the [Pantone](https://www.pantone.com/uk/en/color-finder) website.
+
+Product Catalog provides a REST API to read:
  - all products;
  - all characteristics for a specific product;
  - a specific combination of a product and a characteristic.
@@ -21,11 +23,9 @@ This allows events to arrive out-of-order, and also allows duplicate events.
 
 A product is a generalized description of some entity (like a model of a T-Shirt). Product doesn't depend on or reference another product.
 
-A characteristic is a specification of some specific product (like a combination of size and color). A characteristic is always owned by some product.
+A characteristic is a specification of some specific product (like a combination of size and color). A characteristic always belongs to one product.
 
-The item that is produced and sold is always a combination of a product and a characteristic (it cannot consist of only a product without a characteristic).
-
-One characteristic can be owned only by one product. So, there is a one-to-many relationship between products and characteristics.
+An item that is produced and sold is always a combination of a product and a characteristic (it cannot consist of only a product without a characteristic).
 
 ## Tips
 
