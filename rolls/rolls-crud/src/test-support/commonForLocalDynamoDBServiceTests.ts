@@ -1,8 +1,8 @@
 import { CreateTableCommand, DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import KSUID from "ksuid";
 
-const LOCAL_REGION = "eu-west-1"; // doesn't matter for local DynamoDB, it just needs to be set
-const LOCAL_ENDPOINT = "http://localhost:8000";
+const LOCAL_REGION = process.env.DYNAMODB_TEST_REGION ??  "eu-west-1"; // doesn't matter for local DynamoDB, it just needs to be set
+const LOCAL_ENDPOINT = process.env.DYNAMODB_TEST_URL ?? "http://localhost:8000";
 
 export const createLocalTable = async () => {
   const tableName = `rolls-${(await KSUID.random()).string}`;

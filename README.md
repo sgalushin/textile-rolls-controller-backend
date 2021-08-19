@@ -98,6 +98,14 @@ To run all tests execute `make test` from the project root directory.
 To test that package execute `npm run test` from that package's directory.
 
 All unit tests require DynamoDB Local to be available on `localhost:8000`. To run it in Docker use `docker run -p 8000:8000 -d amazon/dynamodb-local`. Unit tests create randomly named DynamoDB tables and don't delete them after the test (for performance reasons). The expectation is that the DynamoDB Local container should be easily discarded. Running multiple iterations of tests on the same container is fine as a chance for a collision in table names is extremely unlikely.
+ 
+You can change the default location for DynamoDB Local by running tests with the following environment variables:
+
+| Variable Name | Example & Default Value (ie. without the variable being set) | Description |
+|---|---|---|
+|DYNAMODB_TEST_REGION | eu-west-1 | The value doesn't matter for local DynamoDB Instance (but it cannot be empty) |
+| DYNAMODB_TEST_URL | http://localhost:8000 | |
+
 
 
 ### End-to-End tests
