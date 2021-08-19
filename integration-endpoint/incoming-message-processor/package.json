@@ -1,7 +1,7 @@
 {
-  "name": "trc.product-catalog.receive-incoming-message",
+  "name": "trc.integration-endpoint.receive-incoming-message",
   "version": "1.0.0",
-  "description": "Receives products and characteristics from Master Data system, sames images to S3, puts data in SQS queues corresponding to event types.",
+  "description": "Receives products and characteristics from the Master Data system, saves images to S3, puts data in the SQS queues corresponding to the event types.",
   "main": "build/app.js",
   "author": "Sergei Galushin",
   "license": "MIT",
