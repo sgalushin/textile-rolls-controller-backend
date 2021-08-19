@@ -24,8 +24,7 @@ beforeAll(() => {
 });
 
 beforeEach(async () => {
-  const tableName = await createLocalTable();
-  process.env.PRODUCT_TABLE = tableName;
+  process.env.PRODUCT_TABLE = await createLocalTable();
   storage = new ProductStorage();
 });
 

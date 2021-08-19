@@ -1,14 +1,3 @@
-/*
- * Service test, requires running DynamoDB local on port 8000
- * Docker command to start DynamoDB: `docker run -p 8000:8000 -d amazon/dynamodb-local`
- *
- * For each test a new table is created with a random name, so rerunning a test will not result in any interference
- * with previous tests.
- *
- * Tables are not deleted after test for speed and utility. It is expected that DynamoDB is run with ephemeral storage,
- * and each time it's container is started no tables exist.
- */
-
 import { processRecords } from "./QueueProcessor";
 import { product1 } from "../test-support/objectSamples";
 import { record1 } from "../test-support/sqsRecordSamples";
@@ -24,8 +13,7 @@ beforeAll(() => {
 });
 
 beforeEach(async () => {
-  const tableName = await createLocalTable();
-  process.env.PRODUCT_TABLE = tableName;
+  process.env.PRODUCT_TABLE = await createLocalTable();
   storage = new ProductStorage();
 });
 
