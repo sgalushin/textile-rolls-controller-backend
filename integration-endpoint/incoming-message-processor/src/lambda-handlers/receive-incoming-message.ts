@@ -6,16 +6,14 @@ import eventSettings from "../eventSettings";
 
 /**
  * A lambda handler for receiving any type of message.
- * If a message is successfully received, returns an empty 202 responce.
- * If while processing a message a known type of error was encountered, returns
+ * If a message is successfully received, returns an empty 202 response.
+ * If while processing a message a known type of error was encountered, returns 400 response with error description.
+ * If an unknown error was encountered, the Error is propagated and lambda function fallbacks on default AWS behaviour.
  */
 export const lambdaHandler = async (event: lambda.APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   try {
     const { eventType, payload } = validateMessage(event.body);
-
-    if (eventSettings[eventType].runBeforeSendingToQueue) {
-      await eventSettings[eventType].runBeforeSendingToQueue!(payload);
-    }
+    eventSettings[eventType].runBeforeSendingToQueue?.call(null, payload);
     await sendMessageToQueue(eventType, payload);
 
     return {

@@ -12,7 +12,8 @@ interface EventSettings {
 }
 
 /**
- * A static object with keys corresponding to event types and values holding corresponding SQS Queues and JSON Schemas
+ * A static singleton object with keys corresponding to event types and values holding corresponding SQS Queues
+ * and JSON Schemas
  */
 const eventSettings: EventSettings = {
   PRODUCT_UPDATED: {

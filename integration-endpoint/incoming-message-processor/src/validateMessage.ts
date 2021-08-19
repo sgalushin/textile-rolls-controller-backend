@@ -8,6 +8,10 @@ interface Message {
   payload: any;
 }
 
+/**
+ * Checks that an incoming message is valid: it is of a known type and conforms to a corresponding JSON-schema.
+ * If there is a validation error, an error that is a subclass of ErrorWithPredefinedResponse is raised.
+ */
 export const validateMessage = (incomingMessage: string | null) => {
   let message: Message;
 
@@ -17,7 +21,7 @@ export const validateMessage = (incomingMessage: string | null) => {
     throw new ErrorBodyIsNotAJSON();
   }
 
-  if (!message || message == null) {
+  if (!message) {
     throw new ErrorBodyIsNotAJSON();
   }
 
