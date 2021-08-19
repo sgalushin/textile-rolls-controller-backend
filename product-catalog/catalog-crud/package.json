@@ -1,7 +1,7 @@
 {
-  "name": "trc.product-catalog.create-update-characteristic",
+  "name": "trc.product-catalog.catalog-crud",
   "version": "1.0.0",
-  "description": "TRC. Product Catalog service. Lambda function 'create-update-characteristic'",
+  "description": "Creates and updates products and characteristics; exposes API to read them",
   "main": "build/app.js",
   "author": "Sergei Galushin",
   "license": "MIT",
