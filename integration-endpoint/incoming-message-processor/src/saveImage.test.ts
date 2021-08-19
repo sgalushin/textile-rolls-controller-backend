@@ -13,7 +13,7 @@ test("If there is no 'picture' tag, do nothing", async () => {
 
 test("If there is no both 'blob' and 'hash' tags inside a picture/file, do nothing", async () => {
   const payloads = [
-    { picture: { randomtag: 0, blob: "..." } },
+    { picture: { randomTag: 0, blob: "..." } },
     {
       picture: {
         file: {
