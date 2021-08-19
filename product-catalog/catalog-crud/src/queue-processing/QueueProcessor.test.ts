@@ -10,10 +10,10 @@
  */
 
 import { processRecords } from "./QueueProcessor";
-import { product1 } from "./test-support/objectSamples";
-import { record1 } from "./test-support/sqsRecordSamples";
-import { createLocalTable, setEnvironmentVariablesForDynamoDBLocalTesting } from "./test-support/commonForLocalDynamoDBTests";
-import { ProductStorage } from "./storage/ProductStorage";
+import { product1 } from "../test-support/objectSamples";
+import { record1 } from "../test-support/sqsRecordSamples";
+import { createLocalTable, setEnvironmentVariablesForDynamoDBLocalTesting } from "../test-support/commonForLocalDynamoDBTests";
+import { ProductStorage } from "../storage/ProductStorage";
 
 jest.mock("@aws-sdk/client-sqs");
 

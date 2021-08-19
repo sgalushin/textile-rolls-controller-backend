@@ -1,8 +1,8 @@
 import { SQSClient, DeleteMessageBatchCommand, DeleteMessageBatchRequestEntry } from "@aws-sdk/client-sqs";
-import { ProductStorage } from "./storage/ProductStorage";
+import { ProductStorage } from "../storage/ProductStorage";
 import { SQSRecord } from "aws-lambda";
 import { splitArrayIntoEqualChunks } from "./splitArrayIntoEqualChunks";
-import { fetchRGBForPantone } from "./pantone/fetchRGBForPantone";
+import { fetchRGBForPantone } from "../pantone/fetchRGBForPantone";
 
 type EntityName = "product" | "characteristic";
 
