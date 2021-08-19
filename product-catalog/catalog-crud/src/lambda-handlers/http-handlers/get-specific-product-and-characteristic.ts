@@ -1,5 +1,5 @@
 import lambda, { APIGatewayProxyResult } from "aws-lambda";
-import { ProductStorage } from "../storage/ProductStorage";
+import { ProductStorage } from "../../storage/ProductStorage";
 
 export const lambdaHandler = async (event: lambda.APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const productId = event.pathParameters!["productId"]!;
