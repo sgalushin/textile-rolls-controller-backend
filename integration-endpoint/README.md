@@ -5,7 +5,7 @@ This service provides an HTTP endpoint for 1C:Enterprise ERP to send POST reques
 The HTTP endpoint address corresponds to the output parameter `APIAdress` of this CloudFormation Stack.
 
 For authentication, each request must contain `x-api-key` in the header, which equals to the API key that was specified during backend deployment.
-The body of each event must contain the event itself (in JSON). Examples of events are in `src/event-schemas/examples`.
+The body of each post request must contain the event itself (in JSON). Examples of events are in `incoming-message-processor/src/event-schemas/examples`.
 
 If needed, change the `UsagePlan` of the API key in the `template.yaml` to modify quota / throttling limits.
 
