@@ -7,6 +7,7 @@ module.exports = {
     getSpecificProductAndCharacteristic: "./build/lambda-handlers/http-handlers/get-specific-product-and-characteristic.js",
   },
   target: "node",
+  mode: "production",
   output: {
     library: {
       name: "lambdaHandler",
