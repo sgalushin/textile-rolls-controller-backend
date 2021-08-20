@@ -1,8 +1,8 @@
+import MockDate from "mockdate";
 import { createDescendantRollInput, RollsStorage } from "./RollsStorage";
 import { createLocalTable, setEnvironmentVariablesForDynamoDBLocalTesting } from "../test-support/commonForLocalDynamoDBServiceTests";
 import { RollReference } from "./RollReference";
 import { createRollInputSample1, userSample1 } from "../test-support/objectSamples";
-import MockDate from "mockdate";
 
 let storage: RollsStorage;
 
@@ -212,7 +212,5 @@ describe("Create a descendant roll", () => {
     expect(descendantRef.version).toBe(descendantRefReceived.version);
   });
 
-  test("without Ref (e.g. generate new Ref) and read the new roll", async () => {
-    // console.log();
-  });
+  test.todo("without Ref (e.g. generate new Ref) and read the new roll");
 });

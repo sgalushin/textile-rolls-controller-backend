@@ -12,7 +12,7 @@ export const createRollEntity = (table: Table) => {
       user: { required: true, type: "map" },
       previousDepartmentInfo: { required: true, type: "map" },
       registrationDate: { required: true, type: "string" },
-      physicalId: { partitionKey: "gs1", required: false, type: "string" }, // TODO required should be true
+      physicalId: { partitionKey: "gs1", required: false, type: "string" },
       deletionMark: { required: true, type: "boolean" },
       quality: { required: false, type: "map" },
       totalLength: { required: true, type: "number" },
@@ -27,6 +27,12 @@ export const createRollEntity = (table: Table) => {
   });
 };
 
+/**
+ * Returns a string containing first 10 characters of a string-encoded date,
+ * that correspond to a combination of year, month and day (ie. without time).
+ * Can be used for grouping items by date
+ * @param UTCDateString - ISO 8601 date
+ */
 export const truncateDate = (UTCDateString: string) => {
   if (UTCDateString.length != 24) {
     throw new Error("Incorrect date - expected UTC string");

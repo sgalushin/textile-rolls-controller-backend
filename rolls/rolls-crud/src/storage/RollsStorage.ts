@@ -37,6 +37,11 @@ const conditionPkSkExists = [
   { exists: false, attr: "sk" },
 ];
 
+/**
+ * A helper class that abstracts all operations with database.
+ * Saving / reading all roll data must be done using this class.
+ * Detailed explanation of terminology and roll operations is in rolls/README.md
+ */
 export class RollsStorage {
   protected rollsTable: Table;
   protected rollEntity: Entity<{}>;
