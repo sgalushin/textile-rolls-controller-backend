@@ -9,6 +9,9 @@ interface RGBColor {
   b: number;
 }
 
+/**
+ * Converts a string containing Pantone TPX color into RGB color by scraping the official Pantone Website
+ */
 export const fetchRGBForPantone = async (pantone: string): Promise<RGBColor> => {
   const result = await axios.get(`https://www.pantone.com/color-finder/${pantone.trim()}-TPX`, { timeout: TIMEOUT_SECONDS * 1000 });
   const html = parse(result.data);

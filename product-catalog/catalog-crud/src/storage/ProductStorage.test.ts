@@ -1,7 +1,7 @@
 import { ProductStorage } from "./ProductStorage";
 import {
-  checkCharacteristicFields,
-  checkProductFields,
+  checkCharacteristicSpecificFields,
+  checkProductSpecificFields,
   createLocalTable,
   getById,
   setEnvironmentVariablesForDynamoDBLocalTesting,
@@ -33,14 +33,14 @@ describe("Save an object and read it", () => {
     await storage.saveProduct(product1);
     const received = await storage.getProduct(product1.id);
 
-    checkProductFields(received, product1);
+    checkProductSpecificFields(received, product1);
   });
 
   test("For a characteristic", async () => {
     await storage.saveCharacteristic(prod1char1);
 
     const received = await storage.getCharacacteristic(prod1char1.productId, prod1char1.id);
-    checkCharacteristicFields(received, prod1char1);
+    checkCharacteristicSpecificFields(received, prod1char1);
   });
 });
 
@@ -69,8 +69,8 @@ describe("Save two objects and read them all", () => {
 
     const res = await storage.getAllProducts();
     expect(res.length).toBe(2);
-    checkProductFields(getById(res, product1.id), product1);
-    checkProductFields(getById(res, product2.id), product2);
+    checkProductSpecificFields(getById(res, product1.id), product1);
+    checkProductSpecificFields(getById(res, product2.id), product2);
   });
 
   test("For characteristics of the same product", async () => {
@@ -87,8 +87,8 @@ describe("Save two objects and read them all", () => {
 
     const res = await storage.getAllCharacteristics(prod1char1.productId);
     expect(res.length).toBe(2);
-    checkCharacteristicFields(getById(res, prod1char1.id), prod1char1);
-    checkCharacteristicFields(getById(res, prod1char2.id), prod1char2);
+    checkCharacteristicSpecificFields(getById(res, prod1char1.id), prod1char1);
+    checkCharacteristicSpecificFields(getById(res, prod1char2.id), prod1char2);
   });
 });
 
@@ -98,7 +98,7 @@ describe("Update an object with a new version and read it", () => {
     await storage.saveCharacteristic(prod1char2);
 
     const received = await storage.getCharacacteristic(prod1char2.productId, prod1char2.id);
-    checkCharacteristicFields(received, prod1char2);
+    checkCharacteristicSpecificFields(received, prod1char2);
   });
 
   test("For a product", async () => {
@@ -106,7 +106,7 @@ describe("Update an object with a new version and read it", () => {
     await storage.saveProduct(product1v2);
 
     const received = await storage.getProduct(product1.id);
-    checkProductFields(received, product1v2);
+    checkProductSpecificFields(received, product1v2);
   });
 });
 

@@ -12,6 +12,11 @@ type ObjectsProcessedUnsuccessfully = {
   data: string;
 }[];
 
+/**
+ * Reads SQS Records, extracts products or characteristics and saves them to DynamoDB
+ * Successfully saved messages are removed from the queue.
+ * If at least one SQS Record was not processed successfully, throws an error.
+ */
 export const processRecords = async (entityName: EntityName, records: SQSRecord[]) => {
   const sqs = new SQSClient({
     region: process.env.AWS_REGION,

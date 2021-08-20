@@ -52,17 +52,16 @@ export const setEnvironmentVariablesForDynamoDBLocalTesting = () => {
 export const checkProductAndCharCommonFields = (received: any, expected: any) => {
   expect(received.id).toBe(expected.id);
   expect(received.deletionMark).toBe(expected.deletionMark);
-  // expect(received.previousVersion).toBe(expected.previousVersion);
   expect(received.version).toBe(expected.version);
   expect(received.name).toBe(expected.name);
 };
 
-export const checkProductFields = (received: any, expected: any) => {
+export const checkProductSpecificFields = (received: any, expected: any) => {
   checkProductAndCharCommonFields(received, expected);
   expect(received.sku).toBe(expected.sku);
 };
 
-export const checkCharacteristicFields = (received: any, expected: any) => {
+export const checkCharacteristicSpecificFields = (received: any, expected: any) => {
   checkProductAndCharCommonFields(received, expected);
   expect(received.productId).toBe(expected.productId);
 
@@ -76,6 +75,9 @@ export const checkCharacteristicFields = (received: any, expected: any) => {
   }
 };
 
-export const getById = (array: Array<any>, id: string) => {
-  return array.find((e: any) => e.id == id);
+interface hasIdField {
+  id: string;
+}
+export const getById = (array: Array<hasIdField>, id: string) => {
+  return array.find((e) => e.id == id);
 };
