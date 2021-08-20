@@ -4,6 +4,10 @@ import { createCharacteristicEntity } from "./CharacteristicEntity";
 import { createProductEntity } from "./ProductEntity";
 import { ErrorWritingPreviousVersionNotMatched } from "./ErrorWritingPreviousVersionNotMatched";
 
+/**
+ * A helper class that abstracts all operations with database.
+ * Saving / reading all product data must be done using this class.
+ */
 export class ProductStorage {
   protected productsTable: Table;
   protected characteristicEntity: Entity<{}>;
@@ -28,6 +32,15 @@ export class ProductStorage {
     this.productEntity = createProductEntity(this.productsTable);
   }
 
+  /**
+   * Universal function to save any versioned and identifiable DynamoDB entity.
+   * Entity will be successfully saved, if:
+   *  - there is no existing entity with the same 'id';
+   *  - there is an existing entity with the same 'id' and its 'version' is equal
+   *    to the new entity's 'previousVersion'.
+   * @param entity - Product or Characteristic entity (a member of this class).
+   * @param data - an object corresponding to a Product or Characteristic (no checks or validation is performed).
+   */
   protected saveEntity = async (entity: Entity<any>, data: any) => {
     const performOperationOnEntityWithConditional = async (operation: "put" | "update", conditions: any) => {
       try {
